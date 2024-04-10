@@ -6,6 +6,7 @@ class DB:
     def __init__(self, first_day, last_day):
         self.first_day = first_day
         self.last_day = last_day
+        #print('self', self.first_day, self.last_day)
 
     @staticmethod
     def conn():
@@ -26,7 +27,7 @@ class DB:
             r"INNER JOIN FOCCO3I.TORDENS_CON COM ON COM.TORDEN_ROT_ID = ROT.ID) DASDA ON DASDA.ORDEM_ID = TOR.ID "
             r"INNER JOIN FOCCO3I.TCENTROS_TRAB TRA ON TRA.ID = DASDA.CENTR_TRAB_ID "
             r"WHERE EST.ALMOX_ID IN (590,591) "
-            r"AND TOR.DT_LIBERACAO BETWEEN TO_DATE ('" + str(self.first_day) + "', 'YYYY/MM/DD') AND TO_DATE ('" + str(self.last_day) + "', 'YYYY/MM/DD') "
+            r"AND TOR.DT_LIBERACAO BETWEEN TO_DATE ('" + str(self.first_day) + "', 'DD/MM/YY') AND TO_DATE ('" + str(self.last_day) + "', 'DD/MM/YY') "
             r"AND TPL.COD_ITEM <> 55955 "
             r"AND TRA.ID IN (53, 40) "
             r"GROUP BY TOR.DT_LIBERACAO "
