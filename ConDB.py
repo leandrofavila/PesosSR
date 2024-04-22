@@ -6,7 +6,8 @@ class DB:
     def __init__(self, first_day, last_day):
         self.first_day = first_day
         self.last_day = last_day
-        #print('self', self.first_day, self.last_day)
+        
+
 
     @staticmethod
     def conn():
@@ -35,13 +36,14 @@ class DB:
         )
         peso_lib_pcp = cur.fetchall()
         peso_lib_pcp = pd.DataFrame(peso_lib_pcp, columns=['PESO_LIB_PCP', 'DIA'])
+        #print('peso_lib_pcp', peso_lib_pcp)
         return round(peso_lib_pcp['PESO_LIB_PCP'].sum(), 2)
 
     def mp_consumida(self):
         cur, con = self.conn()
         con.commit()
         cur.execute(
-            r"SELECT ROUND (SUM (MOV.QTDE),2) AS MP_CONSUMIDA, MOV.DT "
+            r"SELECT  ROUND(SUM (MOV.QTDE),2) AS MP_CONSUM,  MOV.DT "
             r"FROM FOCCO3I.TMOV_ESTQ MOV "
             r",FOCCO3I.TITENS_ESTOQUE EST "
             r",FOCCO3I.TGRP_CLAS_ITE CLA "
@@ -53,7 +55,7 @@ class DB:
             r"AND MOV.TMVES_ID = TTP.ID "
             r"AND TTP.SIGLA = 'REP' "
             r"AND MOV.ALMOX_ID_ORIG in (590,591) "
-            r"AND MOV.DT BETWEEN TO_DATE ('" + str(self.first_day) + "', 'YYYY/MM/DD') AND TO_DATE ('" + str(self.last_day) + "', 'YYYY/MM/DD') "
+            r"AND MOV.DT BETWEEN TO_DATE ('" + str(self.first_day) + "', 'DD/MM/YY') AND TO_DATE ('" + str(self.last_day) + "', 'DD/MM/YY') "
             r"GROUP BY MOV.DT "
             r"ORDER BY 2 "
         )
@@ -74,7 +76,7 @@ class DB:
             r"WHERE ENG.TP_ITEM = 'F' "
             r"AND CAR.SITUACAO = 'F' "
             r"AND CAR.CARREGAMENTO > 264400 "
-            r"AND CAR.DATA_FIM BETWEEN TO_DATE ('" + str(self.first_day) + "', 'YYYY/MM/DD') AND TO_DATE ('" + str(self.last_day) + "', 'YYYY/MM/DD') "
+            r"AND CAR.DATA_FIM BETWEEN TO_DATE ('" + str(self.first_day) + "', 'DD/MM/YY') AND TO_DATE ('" + str(self.last_day) + "', 'DD/MM/YY') "
             r"GROUP BY CAR.DATA_FIM "
             r"ORDER BY 2 "
         )
@@ -95,7 +97,7 @@ class DB:
             r"AND ROT.ORDEM_ID = TOR.ID "
             r"AND TOR.ID = PRJ.ORDEM_ID "
             r"AND PRJ.FUNC_ID = 1461 "
-            r"AND TMOV.DT_APONT BETWEEN TO_DATE ('01/01/2023', 'DD/MM/YYYY') AND TO_DATE (SYSDATE) "
+            r"WHERE TMOV.DT_APONT BETWEEN TO_DATE('01/01/' || EXTRACT(YEAR FROM SYSDATE), 'DD/MM/YYYY') AND SYSDATE "
             r"GROUP BY EXTRACT(MONTH FROM TMOV.DT_APONT) "
         )
         horas_elev = cur.fetchall()
@@ -110,7 +112,7 @@ class DB:
         cur.execute(
             r"SELECT  round((sum(TMOV.tempo)/60),2) AS TEMP_TOTAL, EXTRACT(month FROM TMOV.DT_APONT) AS MES "
             r"FROM FOCCO3I.TORDENS_MOVTO TMOV "
-            r"WHERE TMOV.DT_APONT BETWEEN TO_DATE ('01/01/2023', 'DD/MM/YYYY') AND TO_DATE (SYSDATE) "
+            r"WHERE TMOV.DT_APONT BETWEEN TO_DATE('01/01/' || EXTRACT(YEAR FROM SYSDATE), 'DD/MM/YYYY') AND SYSDATE "
             r"GROUP BY EXTRACT(month FROM TMOV.DT_APONT) "
         )
         horas_tot = cur.fetchall()

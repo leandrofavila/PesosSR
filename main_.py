@@ -5,7 +5,7 @@ from openpyxl import load_workbook
 import pandas as pd
 import calendar
 
-path = r"C:\Users\pcp03\Desktop\pesos.xlsx"
+path = r"Z:\PCP\pesos.xlsx"
 
 
 def last_monday():
@@ -13,10 +13,9 @@ def last_monday():
     less_days = now % 7
     if less_days == 0:
         less_days = 7
-    #print(less_days)
     last_monday = datetime.now() - timedelta(days=less_days)
     last_day = last_monday + timedelta(days=4)
-    print(last_monday, last_day)
+    #print(last_monday, last_day)
 
     return last_monday, last_day
 
@@ -24,8 +23,8 @@ def last_monday():
 def val_insere():
     first_day, last_day = last_monday()
     range_dias = '{} - {}'.format((first_day.strftime("%d/%m/%y")), (last_day.strftime("%d/%m/%y")))
-    mass = DB(range_dias.split(' - ')[0], range_dias.split(' - ')[0])
-    print(range_dias.split(' - ')[0], range_dias.split(' - ')[0])
+    mass = DB(range_dias.split(' - ')[0], range_dias.split(' - ')[1])
+    #print(range_dias.split(' - ')[0], range_dias.split(' - ')[1])
     df = pd.DataFrame([mass.lib_pcp(),
                        mass.mp_consumida(),
                        mass.peso_car_fechado()],
@@ -37,9 +36,6 @@ def val_insere():
                 df[range_dias]['mp_comsumida'],
                 df[range_dias]['peso_car_fechado']]
     return new_list
-
-
-
 
 
 def find_empty():
@@ -98,7 +94,7 @@ def monta_df():
                    mass_month.horas_tot() - mass_month.horas_elev(),
                    mass_month.horas_elev(),
                    mass_month.horas_tot()]
-    print(lis_to_save)
+    print('lis_to_save', lis_to_save)
     return lis_to_save
 
 
