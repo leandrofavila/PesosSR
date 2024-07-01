@@ -97,7 +97,7 @@ class DB:
             r"AND ROT.ORDEM_ID = TOR.ID "
             r"AND TOR.ID = PRJ.ORDEM_ID "
             r"AND PRJ.FUNC_ID = 1461 "
-            r"WHERE TMOV.DT_APONT BETWEEN TO_DATE('01/01/' || EXTRACT(YEAR FROM SYSDATE), 'DD/MM/YYYY') AND SYSDATE "
+            r"AND TMOV.DT_APONT BETWEEN TO_DATE('01/01/' || EXTRACT(YEAR FROM SYSDATE), 'DD/MM/YY') AND SYSDATE "
             r"GROUP BY EXTRACT(MONTH FROM TMOV.DT_APONT) "
         )
         horas_elev = cur.fetchall()
@@ -112,7 +112,7 @@ class DB:
         cur.execute(
             r"SELECT  round((sum(TMOV.tempo)/60),2) AS TEMP_TOTAL, EXTRACT(month FROM TMOV.DT_APONT) AS MES "
             r"FROM FOCCO3I.TORDENS_MOVTO TMOV "
-            r"WHERE TMOV.DT_APONT BETWEEN TO_DATE('01/01/' || EXTRACT(YEAR FROM SYSDATE), 'DD/MM/YYYY') AND SYSDATE "
+            r"WHERE TMOV.DT_APONT BETWEEN TO_DATE('01/01/' || EXTRACT(YEAR FROM SYSDATE), 'DD/MM/YY') AND SYSDATE "
             r"GROUP BY EXTRACT(month FROM TMOV.DT_APONT) "
         )
         horas_tot = cur.fetchall()

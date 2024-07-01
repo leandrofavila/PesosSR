@@ -13,18 +13,15 @@ def last_monday():
     less_days = now % 7
     if less_days == 0:
         less_days = 7
-    last_monday = datetime.now() - timedelta(days=less_days)
-    last_day = last_monday + timedelta(days=4)
-    #print(last_monday, last_day)
-
-    return last_monday, last_day
+    last_mom = datetime.now() - timedelta(days=less_days)
+    last_day = last_mom + timedelta(days=4)
+    return last_mom, last_day
 
 
 def val_insere():
     first_day, last_day = last_monday()
     range_dias = '{} - {}'.format((first_day.strftime("%d/%m/%y")), (last_day.strftime("%d/%m/%y")))
     mass = DB(range_dias.split(' - ')[0], range_dias.split(' - ')[1])
-    #print(range_dias.split(' - ')[0], range_dias.split(' - ')[1])
     df = pd.DataFrame([mass.lib_pcp(),
                        mass.mp_consumida(),
                        mass.peso_car_fechado()],
@@ -39,6 +36,7 @@ def val_insere():
 
 
 def find_empty():
+    val_insere_month()
     book = load_workbook(path)
     sheet = book['Pesos Semana']
     vazia = ''
@@ -72,11 +70,13 @@ def trata_data_mes():
     if 1 <= datetime.now().day <= 7:
         month_now = datetime.now().month
         month = (int(month_now) - 1) if month_now != 1 else 12
-        init_day = datetime.now().date().strftime("20%y-" + str(month).zfill(2) + "-01")
+        init_day = datetime.now().date().strftime("01/" + str(month).zfill(2) + "/"
+                                                  + str(datetime.now().year).removesuffix('20'))
         y, m = list(map(int, [date.today().strftime('%Y'), date.today().strftime('%m')]))
         last_day_month = (calendar.monthrange(y, month)[1])
-        final_day = (str(datetime.now().date().strftime("20%y-" + str(month).zfill(2) + "-"))
-                     + str(last_day_month if last_day_month != 0 else 1))
+        final_day = (str(last_day_month if last_day_month != 0 else 1) + "/"
+                     + str(datetime.now().date().strftime(str(month).zfill(2))) + "/"
+                     + str(datetime.now().year).removesuffix('20'))
         return init_day, final_day
 
 
@@ -84,7 +84,8 @@ def trata_data_mes():
 def monta_df():
     try:
         di, df = trata_data_mes()
-    except TypeError:
+    except Exception as err:
+        print(err)
         raise
 
     mass_month = DB(di, df)
@@ -94,14 +95,12 @@ def monta_df():
                    mass_month.horas_tot() - mass_month.horas_elev(),
                    mass_month.horas_elev(),
                    mass_month.horas_tot()]
-    print('lis_to_save', lis_to_save)
     return lis_to_save
 
 
 def val_insere_month():
     book, sheet, empty = find_col_empty()
     vazia = str(empty).removeprefix("<Cell 'Pesos Mês'.").removesuffix(">")
-    print(vazia)
     for row in sheet[vazia: 'G{}'.format(vazia[1:])]:
         for idx, cell in enumerate(row):
             cell.value = monta_df()[idx]
