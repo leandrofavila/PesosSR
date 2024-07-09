@@ -8,18 +8,19 @@ import calendar
 path = r"Z:\PCP\pesos.xlsx"
 
 
-def last_monday():
+def last_monday_friday():
     now = datetime.now().weekday()
     less_days = now % 7
     if less_days == 0:
         less_days = 7
     last_mom = datetime.now() - timedelta(days=less_days)
-    last_day = last_mom + timedelta(days=4)
-    return last_mom, last_day
+    last_friday = last_mom + timedelta(days=4)
+    return last_mom, last_friday
 
 
-def val_insere():
-    first_day, last_day = last_monday()
+
+def val_insere_week():
+    first_day, last_day = last_monday_friday()
     range_dias = '{} - {}'.format((first_day.strftime("%d/%m/%y")), (last_day.strftime("%d/%m/%y")))
     mass = DB(range_dias.split(' - ')[0], range_dias.split(' - ')[1])
     df = pd.DataFrame([mass.lib_pcp(),
@@ -35,26 +36,7 @@ def val_insere():
     return new_list
 
 
-def find_empty():
-    val_insere_month()
-    book = load_workbook(path)
-    sheet = book['Pesos Semana']
-    vazia = ''
-    for rowNum in range(1, sheet.max_row):
-        if sheet.cell(row=rowNum, column=1).value is None:
-            vazia = sheet.cell(row=rowNum, column=1)
-            break
-
-    vazia = str(vazia)
-    vazia = vazia.removeprefix("<Cell 'Pesos Semana'.").removesuffix(">")
-    next_row = vazia[1:]
-    for row in sheet[vazia: 'D{}'.format(next_row)]:
-        for idx, cell in enumerate(row):
-            cell.value = val_insere()[idx]
-    book.save(path)
-
-
-def find_col_empty():
+def find_cel_empty_mes():
     book = load_workbook(path)
     sheet = book['Pesos Mês']
     col = 2
@@ -67,24 +49,23 @@ def find_col_empty():
 
 
 def trata_data_mes():
-    if 1 <= datetime.now().day <= 7:
-        month_now = datetime.now().month
-        month = (int(month_now) - 1) if month_now != 1 else 12
-        init_day = datetime.now().date().strftime("01/" + str(month).zfill(2) + "/"
-                                                  + str(datetime.now().year).removesuffix('20'))
-        y, m = list(map(int, [date.today().strftime('%Y'), date.today().strftime('%m')]))
-        last_day_month = (calendar.monthrange(y, month)[1])
-        final_day = (str(last_day_month if last_day_month != 0 else 1) + "/"
-                     + str(datetime.now().date().strftime(str(month).zfill(2))) + "/"
-                     + str(datetime.now().year).removesuffix('20'))
-        return init_day, final_day
+    month_now = datetime.now().month
+    month = (int(month_now) - 1) if month_now != 1 else 12
+    init_day = datetime.now().date().strftime("01/" + str(month).zfill(2) + "/"
+                                              + str(datetime.now().year).removesuffix('20'))
+    y, m = list(map(int, [date.today().strftime('%Y'), date.today().strftime('%m')]))
+    last_day_month = (calendar.monthrange(y, month)[1])
+    final_day = (str(last_day_month if last_day_month != 0 else 1) + "/"
+                 + str(datetime.now().date().strftime(str(month).zfill(2))) + "/"
+                 + str(datetime.now().year).removesuffix('20'))
+    return init_day, final_day
 
 
 
-def monta_df():
+def monta_df_mes():
     try:
         di, df = trata_data_mes()
-    except Exception as err:
+    except TypeError as err:
         print(err)
         raise
 
@@ -99,11 +80,31 @@ def monta_df():
 
 
 def val_insere_month():
-    book, sheet, empty = find_col_empty()
+    book, sheet, empty = find_cel_empty_mes()
     vazia = str(empty).removeprefix("<Cell 'Pesos Mês'.").removesuffix(">")
     for row in sheet[vazia: 'G{}'.format(vazia[1:])]:
         for idx, cell in enumerate(row):
-            cell.value = monta_df()[idx]
+            cell.value = monta_df_mes()[idx]
+    book.save(path)
+
+
+def find_empty():
+    if 1 <= datetime.now().day <= 7:
+        val_insere_month()
+    book = load_workbook(path)
+    sheet = book['Pesos Semana']
+    vazia = ''
+    for rowNum in range(1, sheet.max_row):
+        if sheet.cell(row=rowNum, column=1).value is None:
+            vazia = sheet.cell(row=rowNum, column=1)
+            break
+
+    vazia = str(vazia)
+    vazia = vazia.removeprefix("<Cell 'Pesos Semana'.").removesuffix(">")
+    next_row = vazia[1:]
+    for row in sheet[vazia: 'D{}'.format(next_row)]:
+        for idx, cell in enumerate(row):
+            cell.value = val_insere_week()[idx]
     book.save(path)
 
 
