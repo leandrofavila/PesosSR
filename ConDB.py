@@ -53,7 +53,7 @@ class DB:
             r"AND EST.GRP_CLAS_ID = CLA.ID "
             r"AND EST.COD_ITEM = TIT.COD_ITEM "
             r"AND MOV.TMVES_ID = TTP.ID "
-            r"AND TTP.SIGLA = 'REP' "
+            r"AND TTP.SIGLA IN ('REP', 'REQ', 'AJ1') "
             r"AND MOV.ALMOX_ID_ORIG in (590,591) "
             r"AND MOV.DT BETWEEN TO_DATE ('" + str(self.first_day) + "', 'DD/MM/YY') AND TO_DATE ('" + str(self.last_day) + "', 'DD/MM/YY') "
             r"GROUP BY MOV.DT "
